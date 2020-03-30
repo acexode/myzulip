@@ -1,25 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
+import Landing from './component/landing';
+import Login from './component/login';
+import Chat from './component/chatpage';
+import SignUp from './component/signup';
+import AuthGuard from './component/AuthGuard';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+     <Route path="/" exact component={Landing} />
+     <Route path="/login" exact component={Login} />
+     <Route path="/signup" exact component={SignUp} />
+     <AuthGuard path="/chat" component={Chat} />
+     {/* <Route path="/chat" exact component={Chat} /> */}
+     {/* <Route path="/chat/:id" exact component={Chat} /> */}
+
+    </Router>
   );
 }
 
