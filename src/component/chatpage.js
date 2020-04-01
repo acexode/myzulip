@@ -60,7 +60,8 @@ function Chat() {
     <div className="chat-container">
          <div id="frame" >
              <Channels user={user} channel={channel} switchChannel={switchChannel} />    
-            <Messages user={user} selected={selected} channels={channelsList} />   
+            <Messages user={user} selected={selected} channels={channelsList} /> 
+           
    </div> 
     </div>
   );

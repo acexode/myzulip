@@ -30,6 +30,15 @@
     max-height: 720px;
     background: #E6EAEA;
   }
+  .holder{
+    position: absolute;
+    width: 100%;    
+    top: 12%;
+    bottom: 0;
+    left: 0;    
+    display: flex;
+    flex-direction: column;
+  }
   @media screen and (max-width: 360px) {
     #frame {
       width: 100%;
@@ -38,8 +47,8 @@
   }
   #frame #sidepanel {
     float: left;
-    min-width: 280px;
-    max-width: 340px;
+    min-width: 256px;
+    max-width: 280px;
     width: 40%;
     height: 100%;
      background: #3B3E99;;
@@ -94,6 +103,7 @@
       height: 55px;
     }
   }
+
   #frame #sidepanel #profile .wrap img {
     width: 50px;
     border-radius: 50%;
@@ -106,6 +116,12 @@
     -o-transition: 0.3s border ease;
     -webkit-transition: 0.3s border ease;
     transition: 0.3s border ease;
+  }
+  .profile{
+    width: 30px;
+    height: auto;
+    border-radius: 50%;
+    padding: 3px;
   }
   @media screen and (max-width: 735px) {
     #frame #sidepanel #profile .wrap img {
@@ -519,7 +535,7 @@
   }
   @media screen and (min-width: 900px) {
     #frame .content {
-      width: calc(100% - 340px);
+      width: calc(100% - 280px);
     }
   }
   #frame .content .contact-profile {
@@ -552,7 +568,7 @@
   }
   #frame .content .messages {
     height: auto;
-    width: 100%;
+    /* width: 100%; */
     min-height: calc(100% - 93px);
     max-height: calc(100% - 93px);
      overflow-y: scroll;
@@ -570,11 +586,11 @@
   #frame .content .messages::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.3);
   }
-  #frame .content .messages ul li {
+  #frame .content .messages ul li.msg {
     display: inline-block;
     clear: both;
     float: left;
-    margin: 15px 15px 5px 15px;
+    margin: 15px 15px 5px 15px; 
     width: calc(100% - 25px);
     font-size: 0.9em;
   }
@@ -604,6 +620,13 @@
   #frame .content .messages ul li p {
     display: inline-block;
     padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 205px;
+    line-height: 130%;
+  }
+  .thread{
+    background: #f5f5f5;
+    padding: 5px;
     border-radius: 20px;
     max-width: 205px;
     line-height: 130%;
@@ -711,5 +734,25 @@
 
   .message-li{
     height: 40px;
+  }
+  .sent .pickemoji{
+    display: flex !important;
+    margin-top: -1.7em;
+    margin-left: 1em;
+    width: auto;
+    background: none !important;
+    color: #32465a !important;
+  }
+  .replies .pickemoji{
+    display: flex !important;
+    margin-top: -1.9em;
+    margin-left: calc(100% - 3em);
+    width: auto;
+    background: none !important;
+    color: #32465a !important;
+  }
+  .picked-emoji{
+    font-size: 22px !important;
+    padding-top: 3px !important;
   }
 

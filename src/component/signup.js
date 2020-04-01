@@ -14,7 +14,7 @@ function SignUp() {
     initialValues={{ email: "", password: "", firstName: "", lastName: "", username: "", phone: "", bio: "" }}
     onSubmit={(values, { setSubmitting }) => {
       setTimeout(() => {
-        console.log("Logging in", values);
+        console.log("Logging in", values);     
         axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/users/new`,  values )
         .then(res => {
           console.log(res);
