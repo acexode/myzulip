@@ -3,10 +3,15 @@ import chatcss from './chat.css'
 import { useHistory } from "react-router-dom";
 import {Link,  } from 'react-router-dom'
 import axios from 'axios';
+import ChannelSettings from './channelSetting';
 
 
 
 function Channels({user,channel, switchChannel}) {  
+
+
+	// socket.emit("join", sample)
+
   let history = useHistory();
   let [channelList, setChannelList] = useState([])
 	let usera = JSON.parse(localStorage.getItem("user"))
@@ -19,6 +24,7 @@ function Channels({user,channel, switchChannel}) {
 		}
 	  })
 	  .then(res => {	 
+		// console.log(res.data.channels)
 		setChannelList(res.data.channels)
 	  })
 
@@ -108,7 +114,7 @@ function Channels({user,channel, switchChannel}) {
 		<button id="addcontact" className=" btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<i className="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Create Channel</span>
 		</button>
-		<button id="settings"><i className="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
+		<ChannelSettings />
 		<form onSubmit={handleSubmit}>
 		<ul style={{background: 'transparent', border:'none'}} className="dropdown-menu" aria-labelledby="dropdownMenu2">
 			<li><input className="form-control" type="text" name="name" value={newChannel.name} onChange={handleChange}  placeholder="Name" /></li>

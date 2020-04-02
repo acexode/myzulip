@@ -30,7 +30,7 @@ function Reaction({channel}) {
   const handleShow = () => setShow(true);
   return (
     <>   
-      <i style={{fontSize: '25px'}} onClick={ handleShow } class="pl-2 fa f fa-smile-o text-dark"></i>
+      <i style={{fontSize: '25px'}} onClick={ handleShow } className="pl-2 fa f fa-smile-o text-dark"></i>
       {
               chosenEmoji
                 ? (chosenEmoji.map(ch => <span className="picked-emoji">{ch.emoji}</span>))

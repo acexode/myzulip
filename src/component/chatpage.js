@@ -3,6 +3,7 @@ import chatcss from './chat.css'
 import Channels from './chanels';
 import Messages from './messages';
 import { useHistory } from 'react-router-dom';
+// import socketIOClient from "socket.io-client";
 console.log('object')
 const channelsList = [
     {
@@ -43,8 +44,12 @@ const channelsList = [
         id : 6
     }
 ]
+
 function Chat() {
     const [channel, setChannel] = useState(channelsList)
+    // const [endPoint, setendPoint] = useState('https://glacial-earth-67440.herokuapp.com/')
+    
+    
     let history = useHistory()
     let obj = JSON.parse(localStorage.getItem('user'))
   
