@@ -12,31 +12,17 @@ import Reaction from './reaction';
 import { Navbar, Container, Row, Col } from 'react-bootstrap';
 import io from "socket.io-client";
 
-window.HTMLElement.prototype.scrollIntoView = function() {};
-// {
-//     "message": "Conversation with that messageId already exists.",
-//     "conversationId": "5e84ef102a768c0017fc2698"
-// }
-// {
-//     "message": "Conversation Saved Successfully!",
-//     "createdConvo": {
-//         "_id": "5e85cc7fc85b1a0017050137",
-//         "channelId": "5e7c8991bc436a0017c15d38",
-//         "messageId": "5e85b7cdce69b600173c1e71",
-//         "title": "will add less spice next time",
-//         "__v": 0
-//     }
-// }
   
 function Messages({ selected, channels}) {
     const [endPoint, setendPoint] = useState('https://glacial-earth-67440.herokuapp.com/')
 	 const socket = io(endPoint, {transports: ['websocket']});
     let tempStore = null
+    let scroll = false
     let token = localStorage.getItem('token')
     let user = JSON.parse(localStorage.getItem("user"))
    
     let messagesEnd = createRef()
-    
+  
 
     // current location 
     let history = useHistory()
@@ -65,7 +51,10 @@ function Messages({ selected, channels}) {
     // scroll to bottom
     const scrollToBottom = () => {
         console.log('scrollimg')
-        messagesEnd.scrollIntoView({ behavior: "smooth" }); 
+        setTimeout(()=>{
+            messagesEnd.current.scrollIntoView({ behavior: "smooth" }); 
+
+        },5000)
     }
    
     //fetch channel data
@@ -84,11 +73,14 @@ function Messages({ selected, channels}) {
             }
             console.log(data)
             tempStore = res.data.messages
-            if(res.data.messages.length > 0){
+            if(tempStore.length > 0){
                 setDisqus(tempStore) 
-                setcanScroll(true)
+               scroll = true
+          
+             
             }
             console.log(tempStore)
+            console.log(scroll)
             console.log(res.data.messages.length)
         })           
     }
@@ -100,15 +92,14 @@ function Messages({ selected, channels}) {
             })
         socket.on("joinMessage", (data) => {
             console.log(data)
-        })        
-        if(canScroll && disquses.length > 0){
-            console.log('msg len',disquses.length)
-
-            scrollToBottom()
-
-        }
+        })  
+        console.log(scroll)     
+      
+            // scrollToBottom()
+        
       },[id, setChannel]);
       useEffect(() => {
+         
         return () => {
           console.log("cleaned up");
         };
@@ -119,7 +110,9 @@ function Messages({ selected, channels}) {
             console.log(tempStore)
             tempStore.push(data.message)
             console.log(tempStore)
-            setDisqus(tempStore)
+            // scrollToBottom()
+            // setDisqus(tempStore)
+            getData(id)
             
         })
       }, []);
@@ -243,16 +236,18 @@ function Messages({ selected, channels}) {
       
     </div>
     <div  style={{display: 'flex', flexDirection:'row'}} className="holder">
-    <div className="messages" style={{flex: '70%'}}>
+    <div ref={messagesEnd} className="messages" style={{flex: '70%'}}>
         <ul>
-            {console.log(disquses)}
-            {disquses && disquses.map((message, i) => (
-                <div  key={i}>
+          
+            {disquses && disquses.map((message, i) => {
+
+                return (
+                 <div  key={i}>
                 {message.userId != user.id ? ( 
                     <li className="sent msg">
                 <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
                 <p>{message.message} </p>
-                <p className="pickemoji"> <Reaction channel ={message._id} token={token} /></p>          
+                <p className="pickemoji"> <Reaction emojis={message.emojis} channel ={message._id} token={token} /></p>          
             </li>) :  <li className= "replies msg">
             <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                  
                    
@@ -267,14 +262,16 @@ function Messages({ selected, channels}) {
     </p>
     <p className="pickemoji"> <Reaction channel ={message._id} /></p>
       
-        
-        </li>}
-           <div style={{ float:"left", clear: "both" }}
+           
+        <div style={{ float:"left", clear: "both" }}
                 ref={(el) => { messagesEnd = el; }}>
         </div>
+        </li>}
                
         </div>
-            ))}
+
+                )
+            })}
         </ul>
     </div>
     {showConversation && canScroll ? <div   style={{flex: '30%'}}>       

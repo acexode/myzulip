@@ -105,7 +105,7 @@ function ChannelSettings() {
   </thead>
   <tbody>
       {users.map((user, i)=>(
-        <tr>
+        <tr key={i}>
         <td>{i + 1}</td>
         <td>{user.username}</td>
         <td>{user.isAdmin ? 'Yes' : 'No'}</td>
