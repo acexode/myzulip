@@ -2,20 +2,23 @@ import React, { useState, createRef, useEffect } from 'react';
 import chatcss from './chat.css'
 import { useHistory } from "react-router-dom";
 import axios from 'axios';
-// import { Editor } from 'react-draft-wysiwyg';
-import editor from './editor.css'
+import ScrollToBottom from 'react-scroll-to-bottom';
+import { css } from 'glamor';
 import AddPeople from './addPeople';
 import EditChannel from './channel/EditChannel';
 import DeleteChannel from './channel/DeleteChannel';
 import Picker from 'emoji-picker-react';
 import Reaction from './reaction';
-import { Navbar, Container, Row, Col } from 'react-bootstrap';
-import io from "socket.io-client";
 
-  
+import io from "socket.io-client";
+const ROOT_CSS = css({
+    height: 400,
+   
+  });
+let socket;
 function Messages({ selected, channels}) {
     const [endPoint, setendPoint] = useState('https://glacial-earth-67440.herokuapp.com/')
-	 const socket = io(endPoint, {transports: ['websocket']});
+	socket = io(endPoint, {transports: ['websocket']});
     let tempStore = null
     let scroll = false
     let token = localStorage.getItem('token')
@@ -95,27 +98,21 @@ function Messages({ selected, channels}) {
         })  
         console.log(scroll)     
       
-            // scrollToBottom()
+        return () => {
+            socket.emit("disconnect")
+            socket.off()
+          };
         
       },[id, setChannel]);
+     
       useEffect(() => {
-         
-        return () => {
-          console.log("cleaned up");
-        };
-      }, []);
-      useEffect(() => {
-        socket.on('sendMessageConfirmed', (data) => {
-            console.log(data)
-            console.log(tempStore)
-            tempStore.push(data.message)
-            console.log(tempStore)
+        socket.on('sendMessageConfirmed', (data) => {         
             // scrollToBottom()
-            // setDisqus(tempStore)
-            getData(id)
+             setDisqus([...disquses, data.message])
+            // getData(id)
             
         })
-      }, []);
+      }, [disquses]);
   
     function updateMessage(msg,id){
         setMsg(msg)
@@ -153,6 +150,7 @@ function Messages({ selected, channels}) {
     function openConversation(msg){
         console.log(msg)
         setshowConversation(true)
+        console.log(showConversation)
         setMsgThread(msg)
     }
     function deleteMessage(msg){
@@ -242,7 +240,7 @@ function Messages({ selected, channels}) {
             {disquses && disquses.map((message, i) => {
 
                 return (
-                 <div  key={i}>
+                 <div   key={i}>
                 {message.userId != user.id ? ( 
                     <li className="sent msg">
                 <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
@@ -274,7 +272,7 @@ function Messages({ selected, channels}) {
             })}
         </ul>
     </div>
-    {showConversation && canScroll ? <div   style={{flex: '30%'}}>       
+    {showConversation  ? <div   style={{flex: '30%'}}>       
         <div style={{display:'flex', width: '100%', height:'40px', background: 'white', justifyContent:'space-between', paddingTop: '3px'}}>
             <h5 className="pl-2">Conversation</h5>
             <h5 className="pr-1 text-dark"><a onClick={() => setshowConversation(false)} style={{}}  className="text-dark" href="#">  <i className="fa fa-times" aria-hidden="true"></i></a> </h5>            

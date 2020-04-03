@@ -18,20 +18,23 @@ function Channels({user,channel, switchChannel}) {
 	
   const getData = () =>{
 	let token = localStorage.getItem('token')	
-	  axios.get(`https://glacial-earth-67440.herokuapp.com/api/v1/channels/`, {
+	  axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/channels/user`, {_id: usera.id}, {
 		headers: {
 		  'Authorization': `Bearer ${token}`
 		}
 	  })
 	  .then(res => {	 
-		// console.log(res.data.channels)
+		console.log(res.data)
 		setChannelList(res.data.channels)
 	  })
 
   }
-  getData()
-  useEffect(()=>{
+
+  useEffect(()=>{	
 	  getData()
+	  return (() =>{
+		  console.log('cleared')
+	  })
   },[])
   
   let [newChannel, setNewChannel] = useState({name: '',description: ''})
