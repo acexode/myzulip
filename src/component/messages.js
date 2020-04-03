@@ -9,7 +9,7 @@ import EditChannel from './channel/EditChannel';
 import DeleteChannel from './channel/DeleteChannel';
 import Picker from 'emoji-picker-react';
 import Reaction from './reaction';
-
+import { animateScroll } from "react-scroll";
 import io from "socket.io-client";
 const ROOT_CSS = css({
     height: 400,
@@ -53,18 +53,28 @@ function Messages({ selected, channels}) {
     
     // scroll to bottom
     const scrollToBottom = () => {
-        console.log('scrollimg')
-        setTimeout(()=>{
-            messagesEnd.current.scrollIntoView({ behavior: "smooth" }); 
-
-        },5000)
+        console.log('container scroll')
+        animateScroll.scrollToBottom({
+          containerId: "scrollDiv"
+        });
     }
+    // const scrollToBottom = () => {
+    //     console.log('scrollimg')
+    //     setTimeout(()=>{
+    //         messagesEnd.current.scrollIntoView({ behavior: "smooth" }); 
+
+    //     },5000)
+    // }
    
     //fetch channel data
     const [channel, setChannel] = useState({})
    
     
-    // getData(id)
+    /**
+     * get messages under channel
+     * @param {channelId} id 
+     */
+
     function  getData  (id){
         console.log(id)          	       
         axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/channels/messages`, {_id: id}, {headers: {'Authorization': `Bearer ${token}`}})
@@ -78,6 +88,7 @@ function Messages({ selected, channels}) {
             tempStore = res.data.messages
             if(tempStore.length > 0){
                 setDisqus(tempStore) 
+                scrollToBottom()
                scroll = true
           
              
@@ -89,6 +100,7 @@ function Messages({ selected, channels}) {
     }
     useEffect(() => {
         getData(id)
+        scrollToBottom()
         socket.emit("join", {channelId: id, name: user.username} )
             socket.on("joinMessage", (data) => {
                 console.log(data)
@@ -107,12 +119,19 @@ function Messages({ selected, channels}) {
      
       useEffect(() => {
         socket.on('sendMessageConfirmed', (data) => {         
-            // scrollToBottom()
-             setDisqus([...disquses, data.message])
+             scrollToBottom()
+             console.log(tempStore)
+             setDisqus([...tempStore, data.message])
             // getData(id)
             
         })
       }, [disquses]);
+
+    /**
+     * update a message
+     * @param {string} msg 
+     * @param {string} id 
+     */
   
     function updateMessage(msg,id){
         setMsg(msg)
@@ -120,39 +139,64 @@ function Messages({ selected, channels}) {
         console.log(messagesEnd)
         scrollToBottom()
     }
-    function postConversation(){
+
+    /**
+     * post a new message under conversation
+     * @param {object} event 
+     */
+
+    function postConversation(event){
         const newMsg = {
-            channelId: id,
-            messageId: msgThread._id,           
-            title: newConverse
+            channelId: id,            
+            userId: user.id,   
+            conversationId: msgThread._id,           
+            message: newConverse
         }
         console.log(msgThread)
-        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations`, newMsg, {headers: {'Authorization': `Bearer ${token}`}})
+        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/messages`, newMsg, {headers: {'Authorization': `Bearer ${token}`}})
         .then(res =>{                  
             // setChannel(res.data.channel) 
             
             console.log(res.data)
-        }).catch(error =>{
-            console.log(error.response.data)
-            if(error.response.data.conversationId){
-                let newConvo = {...newMsg, conversationId: error.response.data.conversationId}               
-                axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/messages`, newConvo, {headers: {'Authorization': `Bearer ${token}`}})
-                .then(res =>{                  
-                    // setChannel(res.data.channel)    
-                    console.log(res.data)
-                })   
-            }   
         })
         setConversations([...conversations, newMsg]) 
         setNewConverse('')       
         console.log(newMsg)
+        event.preventDefault();
     }
+
+    /**
+     * create or open an existing conversation
+     * @param {object} msg 
+     */
     function openConversation(msg){
         console.log(msg)
+        let body = {
+            title: msg.message,
+            channelId: id,
+            messageId: msg._id
+        }
+        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations`, body, {headers: {'Authorization': `Bearer ${token}`}})
+            .then(res =>{                  
+                    // setConversations(res.data) 
+                    let conversationId = res.data.conversationId
+                    if(conversationId){
+                        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations/messages`, {messageId: conversationId }, {headers: {'Authorization': `Bearer ${token}`}})
+                        .then(res =>{    
+                            console.log('conversation', res.data)
+                         })
+                    }
+                    console.log(res.data)
+        })   
         setshowConversation(true)
         console.log(showConversation)
         setMsgThread(msg)
     }
+
+    /**
+     * delete a message
+     * @param {object} msg 
+     */
     function deleteMessage(msg){
         console.log('delete', msg)
         axios.delete(`https://glacial-earth-67440.herokuapp.com/api/v1/messages`,{headers: {'Authorization': `Bearer ${token}`}, data: {_id: msg}})
@@ -164,14 +208,29 @@ function Messages({ selected, channels}) {
             console.log(error.response.data)
         })      
     }
-  
+    
+    /**
+     * handle input change
+     * @param {DOM Event} event 
+     */
     function handleChange(event) {
         setMsg(event.target.value)
       }
+
+     /**
+     * handle input change for conversation
+     * @param {DOM Event} event 
+     */
     function conversationChange(event) {
         console.log(event.target.value)
         setNewConverse(event.target.value)
       }
+
+    
+       /**
+     * post new and update message
+     * @param {DOM Event} event 
+     */
      function handleSubmit(event) {           
        if(newUpdateId.length > 0){
         let editedMsg = {
@@ -212,11 +271,13 @@ function Messages({ selected, channels}) {
 
        }
 
-        // scrollToBottom()
+        scrollToBottom()
         setMsg('')       
       
         event.preventDefault();
       }
+
+
   return (
     <div className="chat content" >      
     <div className="contact-profile" style={{display: 'flex', justifyContent:'flex-start', paddingLeft:'10px'}}>
@@ -234,13 +295,14 @@ function Messages({ selected, channels}) {
       
     </div>
     <div  style={{display: 'flex', flexDirection:'row'}} className="holder">
-    <div ref={messagesEnd} className="messages" style={{flex: '70%'}}>
+    <div containerId="scrollDiv" className="messages" style={{flex: '70%'}}>
         <ul>
           
             {disquses && disquses.map((message, i) => {
 
                 return (
-                 <div   key={i}>
+                 <div    key={i}>
+                   {scrollToBottom()} 
                 {message.userId != user.id ? ( 
                     <li className="sent msg">
                 <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
@@ -282,8 +344,7 @@ function Messages({ selected, channels}) {
                 <ul>
                 <li className="replies">
                 <img  style={{float:'right'}}  src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                
-                <p style={{padding: '7px 1px', direction: 'ltr'}} >
-                    <small style={{direction: 'ltr'}}><strong>Name</strong></small> &nbsp; &nbsp;
+                <p style={{padding: '7px 1px', direction: 'ltr'}} >                  
                     {msgThread.message} </p>                    
                 </li> 
                 {conversations && conversations.map((thread, i) => (
