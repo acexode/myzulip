@@ -65,15 +65,9 @@ function Messages({ selected, channels}) {
           containerId: "scrollDiv"
         });
     }
-    // const scrollToBottom = () => {
-    //     console.log('scrollimg')
-    //     setTimeout(()=>{
-    //         messagesEnd.current.scrollIntoView({ behavior: "smooth" }); 
 
-    //     },5000)
-    // }
    
-    //fetch channel data
+ 
     const [channel, setChannel] = useState({})
    
     
@@ -208,6 +202,14 @@ function Messages({ selected, channels}) {
         setMsgThread(msg)
     }
 
+   /**
+    * Logout user
+    */
+    const Logout = () =>{
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        history.push('/login')
+    }
     /**
      * delete a message
      * @param {object} msg 
@@ -300,10 +302,10 @@ function Messages({ selected, channels}) {
         <div className="drop" >  
             <i className="fa fa-cog " data-toggle="dropdown" id="dropdownMenu1" aria-haspopup="true" aria-expanded="false"></i>		
             <ul className="dropdown-menu" aria-labelledby="dropdownMenu1" style={{bottom: '', paddingLeft: '10px'}} >
-                <li className="message-li"><a className='text-dark'  href="#">New Conversation</a></li>
                 <li className="message-li"><EditChannel id={id} /></li>
                 <li className="message-li"><DeleteChannel id={id} /></li>
                 <li className="message-li"> <AddPeople /> </li>               
+                <li onClick={Logout} className="message-li"><a className='text-dark'  href="#">Log Out</a></li>
                            
             </ul>
         </div>

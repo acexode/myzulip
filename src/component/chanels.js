@@ -11,11 +11,21 @@ function Channels({user,channel, switchChannel}) {
 
 
 	// socket.emit("join", sample)
-
+	var colors= ['#ffeb3b','#9c27b0','#ff9800','#3f51b5','#4caf50','#f44336'];
   let history = useHistory();
   let [channelList, setChannelList] = useState([])
+  const [bgColor, setbgColor] = useState('')
+  let bg  = colors[Math.floor(Math.random() * colors.length)]
 	let usera = JSON.parse(localStorage.getItem("user"))
-	
+	const acronym_name = (str) => {
+		var regular_ex=/\b(\w)/g;
+		var matches = str.match(regular_ex);
+		var acronym = matches.join('').slice(0,2);
+		bg = colors[Math.floor(Math.random() * colors.length)]
+		// setbgColor(bg)
+		//return the acronym
+		return acronym;
+	}
   const getData = () =>{
 	let token = localStorage.getItem('token')	
 	  axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/channels/user`, {_id: usera.id}, {
@@ -99,8 +109,13 @@ function Channels({user,channel, switchChannel}) {
                      return(
 						 <Link  key={ch._id} className="chanel-name"  to={`/chat/${ch._id}`}>
 					 	<li>
-							<div className="channels">							
-								<i className="fa fa-hashtag"></i>							
+							<div className="channels">
+						
+							<div id="container_acronym" style={{background:`${bg}`}}>
+							<div id="name_acronym">                        
+								{acronym_name(ch.name)}
+							</div>
+                    </div>   							
 								<p className="name">{ch.name}</p>									
 								{/* <i className="fa fa-times-circle pt-2"  data-toggle="tooltip" data-placement="top" title="Tooltip on top"></i>							 */}
 							</div>
