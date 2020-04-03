@@ -16,6 +16,12 @@ const ROOT_CSS = css({
    
   });
 let socket;
+
+// {
+//     "message": "Conversation with that messageId already exists.",
+//     "conversationId": "5e870b0c9be0540017285166"
+// }
+
 function Messages({ selected, channels}) {
     const [endPoint, setendPoint] = useState('https://glacial-earth-67440.herokuapp.com/')
 	socket = io(endPoint, {transports: ['websocket']});
@@ -37,6 +43,7 @@ function Messages({ selected, channels}) {
     const [canScroll, setcanScroll] = useState(false)
     const [disquses, setDisqus] = useState([])
     const [conversations, setConversations] = useState([])
+    const [conversationId, setConversationId] = useState('')
     const [showConversation, setshowConversation] = useState(false)
     const [msgThread, setMsgThread] = useState(null)
     const [chosenEmoji, setChosenEmoji] = useState(null);
@@ -149,14 +156,15 @@ function Messages({ selected, channels}) {
         const newMsg = {
             channelId: id,            
             userId: user.id,   
-            conversationId: msgThread._id,           
+            conversationId: conversationId,           
             message: newConverse
         }
         console.log(msgThread)
+        console.log(newMsg)
         axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/messages`, newMsg, {headers: {'Authorization': `Bearer ${token}`}})
         .then(res =>{                  
             // setChannel(res.data.channel) 
-            
+            //
             console.log(res.data)
         })
         setConversations([...conversations, newMsg]) 
@@ -177,17 +185,24 @@ function Messages({ selected, channels}) {
             messageId: msg._id
         }
         axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations`, body, {headers: {'Authorization': `Bearer ${token}`}})
-            .then(res =>{                  
-                    // setConversations(res.data) 
-                    let conversationId = res.data.conversationId
+            .then(res =>{                
+               
+                    let conversationId = res.data.conversationId                    
                     if(conversationId){
-                        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations/messages`, {messageId: conversationId }, {headers: {'Authorization': `Bearer ${token}`}})
-                        .then(res =>{    
-                            console.log('conversation', res.data)
-                         })
+                       setConversationId(conversationId)
+                    }else if(res.data.createdConvo){
+                        setConversationId(res.data.createdConvo._id)
                     }
+                    console.log('messageId', msg._id)
+                   
+                    axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations/messages`, {messageId: msg._id}, {headers: {'Authorization': `Bearer ${token}`}})
+                    .then(res =>{   
+                        console.log(res)
+                        setConversations(res.data.messages)
+                       }) 
+
                     console.log(res.data)
-        })   
+        })  
         setshowConversation(true)
         console.log(showConversation)
         setMsgThread(msg)
@@ -231,7 +246,8 @@ function Messages({ selected, channels}) {
      * post new and update message
      * @param {DOM Event} event 
      */
-     function handleSubmit(event) {           
+     function handleSubmit(event) {  
+        scrollToBottom()         
        if(newUpdateId.length > 0){
         let editedMsg = {
             _id: newUpdateId,
@@ -271,7 +287,7 @@ function Messages({ selected, channels}) {
 
        }
 
-        scrollToBottom()
+        
         setMsg('')       
       
         event.preventDefault();
@@ -295,14 +311,14 @@ function Messages({ selected, channels}) {
       
     </div>
     <div  style={{display: 'flex', flexDirection:'row'}} className="holder">
-    <div containerId="scrollDiv" className="messages" style={{flex: '70%'}}>
+    <div id="scrollDiv" className="messages" style={{flex: '70%'}}>
         <ul>
           
             {disquses && disquses.map((message, i) => {
 
                 return (
                  <div    key={i}>
-                   {scrollToBottom()} 
+                  
                 {message.userId != user.id ? ( 
                     <li className="sent msg">
                 <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
@@ -334,23 +350,23 @@ function Messages({ selected, channels}) {
             })}
         </ul>
     </div>
-    {showConversation  ? <div   style={{flex: '30%'}}>       
+    {showConversation  ? <div   style={{flex: '30%', boxSizing:'border-box'}}>       
         <div style={{display:'flex', width: '100%', height:'40px', background: 'white', justifyContent:'space-between', paddingTop: '3px'}}>
             <h5 className="pl-2">Conversation</h5>
             <h5 className="pr-1 text-dark"><a onClick={() => setshowConversation(false)} style={{}}  className="text-dark" href="#">  <i className="fa fa-times" aria-hidden="true"></i></a> </h5>            
             </div>
             {msgThread !=  null ? 
             <div className="messages ">
-                <ul>
-                <li className="replies">
-                <img  style={{float:'right'}}  src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                
+                <ul className="container">
+                <li className="replies mt-2 mb-2 row">
+                <img  style={{float:'right', width: '25px', height: '25px'}}  src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                
                 <p style={{padding: '7px 1px', direction: 'ltr'}} >                  
                     {msgThread.message} </p>                    
                 </li> 
                 {conversations && conversations.map((thread, i) => (
                     <li className="sent" >                       
-                    <img  src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
-                    <p style={{padding: '7px 3px', background:"#f1f1f1", color: "#6c757d"}} >{thread.title} </p>                        
+                    <p style={{padding: '7px 3px', background:"#f1f1f1", color: "#6c757d"}} >{thread.message} </p>                        
+                    <img style={{float:'right', width: '25px', height: '25px'}} src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
                     </li> 
 
                 ))}
