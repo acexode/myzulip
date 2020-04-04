@@ -86,7 +86,9 @@ function Messages({ selected, channels}) {
                 name: user.username,
             }
             console.log(data)
-            tempStore = res.data.messages
+            let arr = res.data.messages.filter(e => !e.conversationId)
+            console.log(arr)
+            tempStore = arr
             if(tempStore.length > 0){
                 setDisqus(tempStore) 
                 scrollToBottom()
