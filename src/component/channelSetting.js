@@ -12,7 +12,7 @@ function ChannelSettings() {
   let token = localStorage.getItem('token')
   let currUser = JSON.parse(localStorage.getItem("user"))
   const [show, setShow] = useState(false);
-  const [user, setUser] = useState({})
+  const [currentUser, setCurrentUser] = useState({})
   const [users, setUsers] = useState([])
   const handleClose = () => setShow(false);
   const toggleAdmin = (user) =>{
@@ -38,7 +38,7 @@ function ChannelSettings() {
       getUsers()  
     axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/users/details`, {_id: currUser.id}, {headers: {'Authorization': `Bearer ${token}`}})
             .then(res =>{                  
-                setUser(res.data.user)
+                setCurrentUser(res.data.user)
                 console.log(res)  
             })     
   
@@ -65,21 +65,21 @@ function ChannelSettings() {
     <div className="col-md-8">
             <Card> 
         <Card.Body>
-  <Card.Title>{user.username} </Card.Title>
+  <Card.Title>{currentUser.username} </Card.Title>
             <Card.Text>
-                Fullname : {user.firstName} {user.lastName}
+                Fullname : {currentUser.firstName} {currentUser.lastName}
             </Card.Text>           
             <Card.Text>
-                Username : {user.username} 
+                Username : {currentUser.username} 
             </Card.Text>           
             <Card.Text>
-                Email : {user.email}
+                Email : {currentUser.email}
             </Card.Text>
             <Card.Text>
-                Phone : {user.phone}
+                Phone : {currentUser.phone}
             </Card.Text>
             <Card.Text>
-                Bio : {user.bio}
+                Bio : {currentUser.bio}
             </Card.Text>           
         </Card.Body>
         </Card>
@@ -90,12 +90,12 @@ function ChannelSettings() {
     </div>
   </Tab>
   <Tab eventKey="profile" title="Edit Profile">
-    <UpdateUser user={user} />
+    <UpdateUser user={currentUser} />
   </Tab>
   <Tab eventKey="contact" title="Settings" >
     <div className="container mt-2">
     <Table striped bordered hover>
-  <thead style={{background: 'black', color:'white'}}>
+  <thead style={{background: '#3b3e99', color:'white'}}>
     <tr>
       <th>#</th>
       <th>User</th>
@@ -109,7 +109,9 @@ function ChannelSettings() {
         <td>{i + 1}</td>
         <td>{user.username}</td>
         <td>{user.isAdmin ? 'Yes' : 'No'}</td>
-        <td><Button onClick={() => toggleAdmin(user)} variant="dark">Toggle Admin</Button></td>
+        { currentUser.isAdmin ? (<td><Button onClick={() => toggleAdmin(user)} style={{background:"#3b3e99"}}>Toggle Admin</Button></td>
+     ): (<td><Button disabled onClick={() => toggleAdmin(user)} style={{background:"#3b3e99"}}>Toggle Admin</Button></td>
+     )}
         </tr>
 
       ))}
