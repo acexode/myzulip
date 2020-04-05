@@ -11,7 +11,7 @@ function Channels({user,channel, switchChannel}) {
 
 
 	// socket.emit("join", sample)
-	var colors= ['#ffeb3b','#9c27b0','#ff9800','#3f51b5','#4caf50','#f44336'];
+	var colors= ['#009688','#9c27b0','#ff9800','#e91e63','#03a9f4','#4caf50','#f44336'];
   let history = useHistory();
   let [channelList, setChannelList] = useState([])
   const [bgColor, setbgColor] = useState('')
@@ -86,65 +86,46 @@ function Channels({user,channel, switchChannel}) {
 	 history.goBack(1)
   }
   return ( 
-         <div id="sidepanel">
-		<div id="profile">
-			<div className="wrap">
-				<img id="profile-img" src="https://lh3.googleusercontent.com/a-/AOh14GgPxle11ueE5CXJGGxVNcSZ91iZTRObMwHBGhH0vQ=s192-cc-rg" className="online" alt="" />
-				<p>{usera.username}</p>
+         <div className="channelList">
+			 <div className="user">
+                <div className="img-container">
+                    <img src="https://lh3.googleusercontent.com/a-/AOh14GgPxle11ueE5CXJGGxVNcSZ91iZTRObMwHBGhH0vQ=s192-cc-rg" alt="" />
+                </div>
+                <p>{usera.username}</p>
+            </div>
+			<div class="channels">
+                <ul id="list">
+				{ channelList.map((ch) =>{ 
+					 return(
+						<Link  key={ch._id}   to={`/chat/${ch._id}`}>
+						<li className="channel">						  
+						<div style={{background:`${bg}`}} className="acronyms">
+							{acronym_name(ch.name)}
+						</div>
+						<div class="name" > <p className="name">{ch.name}</p> </div>
+					   </li>
+						</Link>
+					 )
+
+				})}	
+                   
+                </ul>
+            </div>		
+			<div className="bottom-buttons dropup">
+                <a className=" btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href=""><i className="fa fa-user-plus"></i> Create Channel</a>
+                <ChannelSettings />
 				
-				<div id="status-options">
-					<ul>
-						<li id="status-online" className="active"><span className="status-circle"></span> <p>Online</p></li>
-						<li id="status-away"><span className="status-circle"></span> <p>Away</p></li>
-						<li id="status-busy"><span className="status-circle"></span> <p>Busy</p></li>
-						<li id="status-offline"><span className="status-circle"></span> <p>Offline</p></li>
-					</ul>
-				</div>
-			
-			</div>
-		</div>	
-		<div id="contacts">
-			<ul>
-                { channelList.map((ch) =>{                    
-                     return(
-						 <Link  key={ch._id} className="chanel-name"  to={`/chat/${ch._id}`}>
-					 	<li>
-							<div className="channels">
-						
-							<div id="container_acronym" style={{background:`${bg}`}}>
-							<div id="name_acronym">                        
-								{acronym_name(ch.name)}
-							</div>
-                    </div>   							
-								<p className="name">{ch.name}</p>									
-								{/* <i className="fa fa-times-circle pt-2"  data-toggle="tooltip" data-placement="top" title="Tooltip on top"></i>							 */}
-							</div>
+				<form onSubmit={handleSubmit}>
+					<ul style={{background: 'transparent', border:'none'}} className="dropdown-menu" aria-labelledby="dropdownMenu2">
+						<li><input className="form-control" type="text" name="name" value={newChannel.name} onChange={handleChange}  placeholder="Name" /></li>
+						<li><input className="form-control" type="text" name="description" value={newChannel.description} onChange={handleChange}  placeholder="Description" /></li>
+						<li>
+							<button style={{display: "None"}} type="submit">Submit</button>
 						</li>
-						 </Link>
-				
-				)
-            })}				
-			</ul>
-   
-   </div>
-			{/* <button id="addcontact" ><i className="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Create Channel</span></button> */}   
-	<div id="bottom-bar" className="dropup">
-		<button id="addcontact" className=" btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<i className="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Create Channel</span>
-		</button>
-		<ChannelSettings />
-		<form onSubmit={handleSubmit}>
-		<ul style={{background: 'transparent', border:'none'}} className="dropdown-menu" aria-labelledby="dropdownMenu2">
-			<li><input className="form-control" type="text" name="name" value={newChannel.name} onChange={handleChange}  placeholder="Name" /></li>
-			<li><input className="form-control" type="text" name="description" value={newChannel.description} onChange={handleChange}  placeholder="Description" /></li>
-			<li>
-				<button style={{display: "None"}} type="submit">Submit</button>
-			</li>
-			
-		</ul>
-		</form>
-</div>
-		
+						
+					</ul>
+				</form>
+            </div>
   
     </div>
   );

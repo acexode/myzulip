@@ -17,10 +17,7 @@ const ROOT_CSS = css({
   });
 let socket;
 
-// {
-//     "message": "Conversation with that messageId already exists.",
-//     "conversationId": "5e870b0c9be0540017285166"
-// }
+
 
 function Messages({ selected, channels}) {
     const [endPoint, setendPoint] = useState('https://glacial-earth-67440.herokuapp.com/')
@@ -48,6 +45,7 @@ function Messages({ selected, channels}) {
     const [msgThread, setMsgThread] = useState(null)
     const [chosenEmoji, setChosenEmoji] = useState(null);
     const [emojiToggle, setEmojiToggle] = useState(false)
+    const [msgOwner, setmsgOwner] = useState({})
     const [newUpdateId, setnewUpdateId] = useState('')
     const onEmojiClick = (event, emojiObject) => {
         setChosenEmoji(emojiObject);
@@ -69,7 +67,11 @@ function Messages({ selected, channels}) {
    
  
     const [channel, setChannel] = useState({})
-   
+   const author = async (id) =>{
+    let promise = await axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/users/details`, {_id: id},{headers: {'Authorization': `Bearer ${token}`}})
+    let {data} = await promise
+    return  data
+   }
     
     /**
      * get messages under channel
@@ -175,11 +177,18 @@ function Messages({ selected, channels}) {
      */
     function openConversation(msg){
         console.log(msg)
+        console.log((author(msg.userId)))
         let body = {
             title: msg.message,
             channelId: id,
             messageId: msg._id
         }
+        axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/users/details`, {_id: msg.userId},{headers: {'Authorization': `Bearer ${token}`}})
+        .then(res =>{         
+                console.log(res.data)
+                setmsgOwner(res.data.user)
+
+               })
         axios.post(`https://glacial-earth-67440.herokuapp.com/api/v1/conversations`, body, {headers: {'Authorization': `Bearer ${token}`}})
             .then(res =>{                
                
@@ -299,10 +308,10 @@ function Messages({ selected, channels}) {
 
 
   return (
-    <div className="chat content" >      
-    <div className="contact-profile" style={{display: 'flex', justifyContent:'flex-start', paddingLeft:'10px'}}>
-        <div className="drop" >  
-            <i className="fa fa-cog " data-toggle="dropdown" id="dropdownMenu1" aria-haspopup="true" aria-expanded="false"></i>		
+    <div className="main" > 
+    <div className="chatbox" > 
+        <div className="title-bar">
+            <a  data-toggle="dropdown" id="dropdownMenu1" aria-haspopup="true" aria-expanded="false"><i className="fa fa-cog"></i> </a> &nbsp;  &nbsp;
             <ul className="dropdown-menu" aria-labelledby="dropdownMenu1" style={{bottom: '', paddingLeft: '10px'}} >
                 <li className="message-li"><EditChannel id={id} /></li>
                 <li className="message-li"><DeleteChannel id={id} /></li>
@@ -310,100 +319,114 @@ function Messages({ selected, channels}) {
                 <li onClick={Logout} className="message-li"><a className='text-dark'  href="#">Log Out</a></li>
                            
             </ul>
+            <a className="channel-title" href=""> {channel && channel.name}</a>
+
         </div>
-            <p style={{marginLeft: '15px'}}>{channel && channel.name}</p>                 
-      
-    </div>
-    <div  style={{display: 'flex', flexDirection:'row'}} className="holder">
-    <div id="scrollDiv" className="messages" style={{flex: '70%'}}>
-        <ul>
-          
+        <div id="scrollDiv" className="messages">
             {disquses && disquses.map((message, i) => {
-
-                return (
-                 <div    key={i}>
-                  
-                {message.userId != user.id ? ( 
-                    <li className="sent msg">
-                <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
-                <p>{message.message} </p>
-                <p className="pickemoji"> <Reaction emojis={message.emojis} channel ={message._id} token={token} /></p>          
-            </li>) :  <li className= "replies msg">
-            <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                  
-                   
-            <p>{message.message}   <span className="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu" aria-haspopup="true" aria-expanded="false"></span>	
-        <ul className="dropdown-menu" aria-labelledby="dropdownMenu1" style={{bottom: '', paddingLeft: '10px'}} >            
-        <li onClick={() => updateMessage(message.message, message._id)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Edit Message</a> </li>               
-        <li onClick={() => deleteMessage(message._id)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Delete Message</a> </li>           
-        <li onClick={() => openConversation(message)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Start Conversation</a> </li>           
-                 
-    </ul>
-    
-    </p>
-    <p className="pickemoji"> <Reaction channel ={message._id} /></p>
-      
-           
-        <div style={{ float:"left", clear: "both" }}
-                ref={(el) => { messagesEnd = el; }}>
-        </div>
-        </li>}
-               
-        </div>
-
-                )
-            })}
-        </ul>
-    </div>
-    {showConversation  ? <div   style={{flex: '30%', boxSizing:'border-box'}}>       
-        <div style={{display:'flex', width: '100%', height:'40px', background: 'white', justifyContent:'space-between', paddingTop: '3px'}}>
-            <h5 className="pl-2">Conversation</h5>
-            <h5 className="pr-1 text-dark"><a onClick={() => setshowConversation(false)} style={{}}  className="text-dark" href="#">  <i className="fa fa-times" aria-hidden="true"></i></a> </h5>            
-            </div>
-            {msgThread !=  null ? 
-            <div className="messages ">
-                <ul className="container">
-                <li className="replies mt-2 mb-2 row">
-                <img  style={{float:'right', width: '25px', height: '25px'}}  src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />                
-                <p style={{padding: '7px 1px', direction: 'ltr'}} >                  
-                    {msgThread.message} </p>                    
-                </li> 
-                {conversations && conversations.map((thread, i) => (
-                    <li className="sent" >                       
-                    <p style={{padding: '7px 3px', background:"#f1f1f1", color: "#6c757d"}} >{thread.message} </p>                        
-                    <img style={{float:'right', width: '25px', height: '25px'}} src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" /> 
-                    </li> 
-
-                ))}
-               
-                </ul>
-                <div style={{display:'flex', width: '100%'}}>
-            <form style={{display:'flex', width: '100%', marginTop:"10px"}} onSubmit={postConversation}>
-        <input type="text" value={newConverse} onChange={conversationChange} placeholder="Write your message..." />    
- 
-      
-        <button type="submit" className="btn btn-secondary" style={{height: '40px'}}><i className="fa fa-paper-plane" aria-hidden="true"></i></button>
-        </form>
-            </div>
-            </div> : ''
-            
-            }
-           
-            
+                    return (
+                        <>
+                            {message.userId == user.id ? (
+                                <div className="sent">
+                                <div>
+                                    <p>{message.message} &nbsp;
+                                    <span className="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu" aria-haspopup="true" aria-expanded="false"></span>
+                                    <ul className="dropdown-menu" aria-labelledby="dropdownMenu1" style={{bottom: '', paddingLeft: '10px'}} >            
+                                        <li onClick={() => updateMessage(message.message, message._id)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Edit Message</a> </li>               
+                                        <li onClick={() => deleteMessage(message._id)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Delete Message</a> </li>           
+                                        <li onClick={() => openConversation(message)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Start Conversation</a> </li>           
+                                                
+                                    </ul>
+                                    </p>
+                                    <div className="emoji-container">
+                                        <Reaction emojis={message.emojis} channel ={message._id} token={token} />
+                                       
+                                    </div>
+                                    
+                                </div>
+                                <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />
         
-        </div> : '' } 
-    
-
-    </div>
-    <div className="message-input">
-        <div className="wrap">
-        <form onSubmit={handleSubmit}>
-        <input type="text" value={msg} onChange={handleChange} placeholder="Write your message..." />    
- 
-        <i className="fa fa-paperclip attachment" aria-hidden="true"></i>
-        <button type="submit" className="submit"><i className="fa fa-paper-plane" aria-hidden="true"></i></button>
-        </form>
+                            </div>
+                        ) : (
+                            <div className="replies">
+                            <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />
+                            <div>
+                                <p >{message.message} &nbsp;
+                                        <span className="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu" aria-haspopup="true" aria-expanded="false"></span>
+                                        <ul className="dropdown-menu" aria-labelledby="dropdownMenu1" style={{bottom: '', paddingLeft: '10px'}} >            
+                                            <li onClick={() => openConversation(message)} style={{height: '20px'}} className="message-li msg"> <a className='text-dark'  href="#">Start Conversation</a> </li>           
+                                        </ul>
+                                </p>
+                                <div className="emoji-container-replies">
+                                    <Reaction emojis={message.emojis} channel ={message._id} token={token} />                                       
+                                </div>
+                            </div>
+                            
+                        </div>
+                        )}
+                        </>
+                    )
+            })}
+        </div>  
+        <form onSubmit={handleSubmit} class="post">
+            <input type="text" value={msg} onChange={handleChange} placeholder="write your message" class="input-msg" />
+            <button class="post-msg" href=""><i class="fa fa-paper-plane"></i></button>
+        </form>  
         </div>
-    </div>
+        {showConversation  ? 
+            <div className="conversation">
+                <div className="conversation-title">                    
+                    <div className="thread-title">
+                        <a href="">Conversation</a>
+                        <small>{msgOwner.username}</small>
+                    </div>
+                    <a className="close-conversation" href="">X</a>
+
+                </div>
+                {msgThread !=  null ?
+                    <> 
+                    <div className="conversations">
+                        <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />
+                        <div className="conversation-msg">
+                            <a href="" className="sender"> {msgOwner.username} </a>
+                            <p>  {msgThread.message} </p>
+                        </div>
+                    </div>
+                    <div className="conversations">
+                    <p className="num-replies"> {conversations.length + ' reply'} </p>
+                        <div className="underline">
+                        
+                        </div>
+                    </div>
+                    {conversations && conversations.map((thread, i) => (
+                          <>
+                            <div className="conversations">
+                                <img src="https://ca.slack-edge.com/TQHUN32CR-US2EW3C4D-g0a639bf1457-192" alt="" />
+                                <div className="conversation-msg">
+                                    <a href="" className="sender"> Anonymous </a>
+                                    <p> {thread.message} </p>
+                                </div>
+                            </div>
+                          </>
+
+                    ))}
+                            <form onSubmit={postConversation} class="post">
+                                <input type="text"  value={newConverse} onChange={conversationChange}  placeholder="write your message" class="input-msg" />
+                                <button class="post-msg" href=""><i class="fa fa-paper-plane"></i></button>
+                            </form>
+                </>
+                :''
+            
+                
+                }
+
+
+            </div>  
+        : ''}
+ 
+
+  
+  
 </div>
        
 

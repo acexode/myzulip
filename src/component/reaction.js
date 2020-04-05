@@ -13,7 +13,7 @@ function Reaction({emojis,channel}) {
     const [show, setShow] = useState(false);
     const [chosenEmoji, setChosenEmoji] = useState(emojis); 
     const onEmojiClick = (event, emojiObject) => {
-        setChosenEmoji(prev => [emojiObject]);   
+        setChosenEmoji(prev => [...prev, emojiObject]);   
         let reaction = {
             _id : channel,
             user_id : user.id,

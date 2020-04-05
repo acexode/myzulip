@@ -49,8 +49,8 @@ function ChannelSettings() {
   
   return (
     <>    
-    
-      <button onClick={handleShow} id="settings"><i className="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
+      
+      <a onClick={handleShow} id="settings"><i className="fa fa-cog fa-fw" aria-hidden="true"></i> Settings</a>
 
       <Modal show={show} onHide={handleClose}>
       <Tabs defaultActiveKey="home" transition={false} id="noanim-tab-example" className="pt-3 pl-3 pr-3">
